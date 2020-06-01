@@ -1,16 +1,10 @@
 import React, { Component } from 'react';
+import MyDrawers from "./MyDrawers.js";
+import MyTabs from "./MyTabs.js";
 
 //https://stackoverflow.com/questions/60007058/react-bootstrap-tab-showing-all-content-at-once
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Tabs, Tab } from 'react-bootstrap';
-import {
-  Drawer, List, ListItem, ListItemText,
-  IconButton, Divider, Hidden, Grid
-} from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
 import { blue, green, brown, red } from '@material-ui/core/colors';
-
-
 
 import './App.css';
 
@@ -18,7 +12,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      key: "home",
+      sectionKey: "home",
       largeHeader: "The Wall Street Journal",
       smallHeader: "WSJ",
       openDrawer: false,
@@ -33,7 +27,6 @@ export default class App extends Component {
   componentDidMount() {
     this.updateWindowDimensions();
     window.addEventListener("resize", this.updateWindowDimensions);
-
   }
 
   componentWillUnmount() {
@@ -45,12 +38,10 @@ export default class App extends Component {
       windowDimensions:
         { width: window.innerWidth, height: window.innerHeight }
     });
-    console.log(window.innerWidth, window.innerHeight)
-    console.log(this.state.windowDimensions)
   }
 
   setKey = (k) => {
-    this.setState({ key: k })
+    this.setState({ sectionKey: k })
     this.formatHeader(k, true);
   }
 
@@ -65,6 +56,7 @@ export default class App extends Component {
       else {
         newHeader = "WSJ"
         this.setState({ smallHeader: newHeader })
+        this.toggleDrawer()
       }
       this.setState({ section: "" })
     }
@@ -75,6 +67,7 @@ export default class App extends Component {
       }
       else {
         this.setState({ smallHeader: newHeader })
+        this.toggleDrawer()
       }
 
       if (k === "World") {
@@ -100,76 +93,12 @@ export default class App extends Component {
       } else if (k === "WSJ Magazine") {
         section = <div>MAGAZINE</div>
       }
-
       this.setState({ section: section })
     }
   }
 
   toggleDrawer = () => {
     this.setState({ openDrawer: !this.state.openDrawer })
-  }
-
-  formatDrawer = () => {
-    return (
-      <div>
-        <IconButton
-          color="inherit"
-          edge="start"
-          onClick={this.toggleDrawer}
-          className="menu"
-        >
-          <MenuIcon />
-        </IconButton>
-        <Hidden smUp implementation="css" className="hiddenDrawers">
-          <Drawer
-            variant="temporary"
-            anchor="left"
-            open={this.state.openDrawer}
-            onClose={this.toggleDrawer}
-            className="drawer"
-          >
-            <IconButton
-              color="inherit"
-              edge="start"
-              onClick={this.toggleDrawer}
-              className="menu"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Grid container >
-              {this.state.subheaders.map(subhead => {
-                return (
-                  <Grid item xs={12} sm={6}>
-                    <ListItem button key={subhead} onClick={() => this.formatHeader(subhead, false)}>
-                      <ListItemText primary={subhead} />
-                    </ListItem>
-                  </Grid>
-                )
-
-              })}
-
-            </Grid>
-          </Drawer>
-        </Hidden>
-      </div>
-    )
-  }
-
-  showTabs = () => {
-    return (
-      <Tabs
-        id="tabs"
-        activeKey={this.state.key}
-        onSelect={(k) => this.setKey(k)}>
-        {this.state.subheaders.map(subhead => {
-          return (
-            <Tab eventKey={subhead} title={subhead}>
-              {subhead}
-            </Tab>
-          )
-        })}
-      </Tabs >
-    )
   }
 
   render() {
@@ -179,7 +108,14 @@ export default class App extends Component {
 
           <div>
             <div className="smallScreenHeader">
-              <div className="menuB">{this.formatDrawer()}</div>
+              <div className="menuB">
+                <MyDrawers
+                  toggleDrawer={this.toggleDrawer}
+                  openDrawer={this.state.openDrawer}
+                  subheaders={this.state.subheaders}
+                  formatHeader={this.formatHeader}
+                />
+              </div>
               <header className="smallHeader">{this.state.smallHeader}{this.state.section}</header>
             </div>
           </div>
@@ -189,7 +125,12 @@ export default class App extends Component {
               <header className="largeHeader">{this.state.largeHeader}{this.state.section}</header>
 
               <div className="subheader">
-                {this.showTabs()}
+                <MyTabs
+                  sectionKey={this.state.sectionKey}
+                  setKey={this.setKey}
+                  subheaders={this.state.subheaders}
+                />
+                {console.log(this.state.sectionKey)}
               </div>
             </div>
           </div>
